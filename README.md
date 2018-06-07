@@ -1,3 +1,6 @@
+This project is no longer being maintained
+==========================================
+
 sticky-headers-recyclerview
 ===========================
 
@@ -16,7 +19,10 @@ Here is a quick video of it in action (click to see the full video):
 Download
 --------
 
-    compile 'com.timehop.stickyheadersrecyclerview:library:0.3.3@aar'
+Current version: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.timehop.stickyheadersrecyclerview/library/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.timehop.stickyheadersrecyclerview/library)
+
+    compile 'com.timehop.stickyheadersrecyclerview:library:[latest.version.number]@aar'
+
 
 Usage
 -----
@@ -52,7 +58,7 @@ mRecyclerView.setLayoutManager(new LinearLayoutManager(context));
 mRecyclerView.addItemDecoration(new StickyRecyclerHeadersDecoration(mAdapter));
 ```
 
-Finally, `StickyRecyclerHeadersTouchListener` allows you to listen for clicks on header views.
+`StickyRecyclerHeadersTouchListener` allows you to listen for clicks on header views.
 Simply create an instance of `StickyRecyclerHeadersTouchListener`, set the `OnHeaderClickListener`,
 and add the `StickyRecyclerHeadersTouchListener` as a touch listener to your `RecyclerView`.
 
@@ -70,10 +76,34 @@ touchListener.setOnHeaderClickListener(
 mRecyclerView.addOnItemTouchListener(touchListener);
 ```
 
+The StickyHeaders aren't aware of your adapter so if you must notify them when your data set changes.
+
+```java
+    mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+      @Override public void onChanged() {
+        headersDecor.invalidateHeaders();
+      }
+    });
+```
+
+If the Recyclerview's layout manager implements getExtraLayoutSpace (to preload more content then is
+visible for performance reasons), you must implement ItemVisibilityAdapter and pass an instance as a
+second argument to StickyRecyclerHeadersDecoration's constructor.
+```java
+    @Override
+    public boolean isPositionVisible(final int position) {
+        return layoutManager.findFirstVisibleItemPosition() <= position
+            && layoutManager.findLastVisibleItemPosition() >= position;
+    }
+```
+
+
+Item animators don't play nicely with RecyclerView decorations, so your mileage with that may vary.
+
 Compatibility
 -------------
 
-This should work everywhere that RecyclerView does (API 7+).
+API 11+
 
 Known Issues
 ------------
@@ -82,8 +112,24 @@ Known Issues
 
 * I haven't tested this with ItemAnimators yet.
 
+* The header views are drawn to a canvas, and are not actually a part of the view hierarchy. As such, they can't have touch states, and you may run into issues if you try to load images into them asynchronously.
+
 Version History
 ---------------
+0.4.3 (12/24/2015) - Change minSDK to 11, fix issue with header bounds caching
+
+0.4.2 (8/21/2015) - Add support for reverse `ReverseLayout` in `LinearLayoutManager` by [AntonPukhonin](https://github.com/AntonPukhonin)
+
+0.4.1 (6/24/2015) - Fix "dancing headers" by DarkJaguar91
+
+0.4.0 (4/16/2015) - Code reorganization by danoz73, fixes for different sized headers, performance improvements
+
+0.3.6 (1/30/2015) - Prevent header clicks from passing on the touch event
+
+0.3.5 (12/12/2014) - Add StickyRecyclerHeadersDecoration.invalidateHeaders() method
+
+0.3.4 (12/3/2014) - Fix issues with rendering of header views with header ID = 0
+
 0.3.3 (11/13/2014) - Fixes for padding, support views without headers
 
 0.3.2 (11/1/2014) - Bug fixes for list items with margins and deleting items
